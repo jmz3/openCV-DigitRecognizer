@@ -1,10 +1,11 @@
+** OCR Recognition **
 This module contains the training and the recognition part of the project.
 
-Steps:
+Steps: <br>
 download the folder as zip OR clone the folder.
 extract the RawData.zip in the same directory.
 
-Syntax for execution
+Syntax for execution <br>
 cmd> 1x Trainer.exe <br>
 cmd> 2x Serialize_Training.exe <br>
 cmd> 3x openCV-OCR.exe <input image> <br>
