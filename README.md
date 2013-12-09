@@ -8,7 +8,8 @@ extract the RawData.zip in the same directory.
 Syntax for execution <br>
 cmd> 1x Trainer.exe <br>
 cmd> 2x Serialize_Training.exe <br>
-cmd> 3x openCV-OCR.exe <input image> <br>
+cmd> 3x openCV-OCR.exe input_image <br>
+eg. openCV-OCR.exe four_test.png
 
 TODO:
 fix the argument index "Usage is OpenCV-Image-To-Bin-Txt <input_image>"
