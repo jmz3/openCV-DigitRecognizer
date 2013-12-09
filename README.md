@@ -1,4 +1,4 @@
-** OCR Recognition **
+### OCR Recognition 
 This module contains the training and the recognition part of the project.
 
 Steps: <br>
