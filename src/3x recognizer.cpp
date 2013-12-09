@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 	CvANN_MLP nnetwork;
 	
 	//read the model from the XML file and create the neural network.
-	CvFileStorage* storage = cvOpenFileStorage("param.xml", 0, CV_STORAGE_READ );
+	CvFileStorage* storage = cvOpenFileStorage("serialized_training.xml", 0, CV_STORAGE_READ );
 	CvFileNode *n = cvGetFileNodeByName(storage,0,"DigitOCR");
 	nnetwork.read(storage,n);
 	cvReleaseFileStorage(&storage);
