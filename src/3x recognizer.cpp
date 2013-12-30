@@ -4,19 +4,24 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <string.h>
 #include <fstream>
+using std::stringstream;
 
 #define ATTRIBUTES 256  		//Number of pixels per sample.16X16
 #define CLASSES 10              //Number of distinct labels.
 #define TEST_SAMPLES 1       	//Number of samples in test dataset
-
 
 //scale the input image to 16x16.
 void scaleDownImage(cv::Mat &originalImg,cv::Mat &scaledDownImage )
 {      
 	for(int x=0;x<16;x++) {
 		for(int y=0;y<16 ;y++) {
-			int yd =ceil((float)(y*originalImg.cols/16));
-			int xd = ceil((float)(x*originalImg.rows/16));
+			//_original code
+			//int yd = ceil((float)(y*originalImg.cols/16));
+			//int xd = ceil((float)(x*originalImg.rows/16));
+
+			//int proper_int_number = static_cast<int>(input_float_number)
+			int yd = (int) ceil( static_cast<int>(y*originalImg.cols/16) );
+			int xd = (int) ceil( static_cast<int>(x*originalImg.rows/16) );
 			scaledDownImage.at<uchar>(x,y) = originalImg.at<uchar>(xd,yd);
 		}
 	}
@@ -106,12 +111,10 @@ void convertToPixelValueArray(cv::Mat &img,int pixelarray[])
 	}
 }
 
-//read a file and 
-/*	std::fstream readFile(std::string datasetPath)	*/
-void readFile(std::string datasetPath, std::string outputfile )
+//read a file and return its data as a string
+std::string readFile(std::string datasetPath)
 {
-			std::fstream file(outputfile,std::ios::out);
-			//std::cout  << datasetPath << std::endl;
+			stringstream myStringStream;
 
 			//reading the image
 			cv::Mat img = cv::imread(datasetPath,0);
@@ -141,49 +144,36 @@ void readFile(std::string datasetPath, std::string outputfile )
 			
 			//writing pixel data to file
 			for(int d=0;d<256;d++){
-				file<<pixelValueArray[d]<<",";
+				//file<<pixelValueArray[d]<<",";
+				myStringStream << pixelValueArray[d];
 			}
-	file.close();
+	return myStringStream.str();
 }
-
-void read_dataset(char *filename, cv::Mat &data, int total_samples)
+//
+void read_dataset(cv::Mat &data, int total_samples, std::string input_file)
 {
 	//variable used to store pixelValue (binary)
-	float pixelvalue;
-	//open the file
-	FILE* inputfile = fopen( filename, "r" );
-
-	//read each row of the csv file
+	float pixelValue;
+	
 	for(int row = 0; row < total_samples; row++) {	
 		//for each attribute in the row
 		for(int col = 0; col <=ATTRIBUTES; col++) {		
 			//if its the pixel value.
 			if (col < ATTRIBUTES){
-				fscanf(inputfile, "%f,", &pixelvalue);
-				data.at<float>(row,col) = pixelvalue;
+				//get the char value of the string at position 'col'
+				char testChar = input_file.at(col);
+				// convert the datatype char to int -> http://bit.ly/19xu9il
+				pixelValue = static_cast<float>(testChar - '0');
+				//insert pixelValue into Mat data at position 'row,col'
+				data.at<float>(row,col) = pixelValue;
 			}
 		}
 	}
-	fclose(inputfile);
 }
 
-int main(int argc, char *argv[])
+int predict(std::string dataOfInput)
 {
-	if(argc != 2) {
-		std::cout << "Usage is OpenCV-Image-To-Bin-Txt <input_image>";
-		return 0;
-	}
-
-	std::cout<<"Reading input image ";
-	std::cout << argv[1];
-	//readFile("C:\\OCR\\test_image.png","C:\\OCR\\image_out.txt");
-
-/*	std::fstream binary_txt = readFile(argv[1]);	*/
-	readFile(argv[1], "output.txt");
-	std::cout << "\nread operation completed"; 
-	
-
-	//create an object of CvANN_MLP
+		//create an object of CvANN_MLP
 	CvANN_MLP nnetwork;
 	
 	//read the model from the XML file and create the neural network.
@@ -196,9 +186,7 @@ int main(int argc, char *argv[])
 	cv::Mat test_set(TEST_SAMPLES,ATTRIBUTES,CV_32F);
 
 	//read the binary data into the Mat for testing 
-	read_dataset("output.txt", test_set, TEST_SAMPLES);
-/*	read_dataset(argv[1], test_set, TEST_SAMPLES);	*/
-	//read_dataset("C:\\OCR\\image_out.txt", test_set, TEST_SAMPLES);
+	read_dataset(test_set, TEST_SAMPLES, dataOfInput);
 
 	//Mat used to store the input image's binary values.
 	cv::Mat test_sample;
@@ -223,6 +211,25 @@ int main(int argc, char *argv[])
 		}
 	}
 	//maxIndex is the predicted class.
-	std::cout << std::endl << maxIndex;
+	//std::cout << std::endl << maxIndex;
+	return maxIndex;
+}
+
+
+int main(int argc, char *argv[])
+{
+	if(argc != 2) {
+		std::cout << "Usage is OpenCV-Image-To-Bin-Txt <input_image>";
+		return 0;
+	}
+
+	std::cout<<"\nReading input image :";
+	std::cout << argv[1];
+
+	std::string dataOfInput  = readFile(argv[1]);
+	//std::cout << "\nread operation completed"; 
+	
+	std::cout << "\nThe output of the input  is " << predict(dataOfInput);
+
     return 0;
 }
